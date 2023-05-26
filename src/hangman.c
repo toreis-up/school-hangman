@@ -33,6 +33,7 @@ int main(void)
   StartGame();
 }
 
+// ゲーム開始
 void StartGame()
 {
   struct GAME_DATA *gameData = initializeGame();
@@ -44,6 +45,28 @@ void StartGame()
   }
 }
 
+
+struct GAME_DATA *initializeGame()
+{
+  srand((unsigned int)time(NULL));
+  struct GAME_DATA *gameData = (struct GAME_DATA *)malloc(sizeof(struct GAME_DATA));
+
+  memset(gameData->alphabets, 0, ALPHABET_COUNT);
+  gameData->correctWord = LoadWord();
+  gameData->tryCount = 0;
+  return gameData;
+}
+
+bool IsAllHit(char * str, int * flags) {
+  for (int i = 0; i < Length(str); i++) {
+    if (flags[str[i] - 'a'] != 1) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// 単語読み出し
 char *LoadWord() {
   FILE *fp;
 
@@ -100,20 +123,7 @@ char *LoadWord() {
   return word;
 }
 
-char *GetUsedChars(int *flags) {
-  char * str = (char *)malloc(sizeof(char) * ALPHABET_COUNT);
-  int c = 0;
-
-  for (int i = 0; i < ALPHABET_COUNT; i++) {
-    if (flags[i] == 1) {
-      str[c] = 'a' + i;
-      c++;
-    }
-  }
-
-  return str;
-}
-
+// ゲーム用ループ
 int MainLoop(struct GAME_DATA *gameData)
 {
   char *baseString = gameData->correctWord;
@@ -157,26 +167,22 @@ int MainLoop(struct GAME_DATA *gameData)
   return 0;
 }
 
-bool IsAllHit(char * str, int * flags) {
-  for (int i = 0; i < Length(str); i++) {
-    if (flags[str[i] - 'a'] != 1) {
-      return false;
+// 使用済み文字列の生成
+char *GetUsedChars(int *flags) {
+  char * str = (char *)malloc(sizeof(char) * ALPHABET_COUNT);
+  int c = 0;
+
+  for (int i = 0; i < ALPHABET_COUNT; i++) {
+    if (flags[i] == 1) {
+      str[c] = 'a' + i;
+      c++;
     }
   }
-  return true;
+
+  return str;
 }
 
-struct GAME_DATA *initializeGame()
-{
-  srand((unsigned int)time(NULL));
-  struct GAME_DATA *gameData = (struct GAME_DATA *)malloc(sizeof(struct GAME_DATA));
-
-  memset(gameData->alphabets, 0, ALPHABET_COUNT);
-  gameData->correctWord = LoadWord();
-  gameData->tryCount = 0;
-  return gameData;
-}
-
+// 文字列組み立て
 char *BuildString(char *base, int *flags)
 {
   char *builtString = (char *)malloc(sizeof(char) * Length(base));
@@ -209,6 +215,7 @@ int Length(char *string)
   return count;
 }
 
+// strの中にchが含まれているかを確認する
 bool IsContain(char *str, char ch)
 {
   bool contain = false;
@@ -223,6 +230,7 @@ bool IsContain(char *str, char ch)
   return contain;
 }
 
+// chはすでに使用されたか、int配列で確認する
 bool IsAlreadyUsed(int *flags, char ch)
 {
   int alphabetIndex = ch - 'a';
@@ -233,6 +241,7 @@ bool IsAlreadyUsed(int *flags, char ch)
   return false;
 }
 
+// int配列をコピーし、そのアドレスを返す
 int *CopyIntArray(int *src, int length)
 {
   int *dup = (int *)malloc(sizeof(int) * length);
